@@ -5,8 +5,7 @@ Handles truck objects, loading, and route progress tracking.
 
 import datetime
 from typing import List, Tuple
-import locations
-import parcels
+from src.core import locations, parcels
 
 
 class Truck:

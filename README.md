@@ -1,18 +1,19 @@
-# Western Governor University's Parcel Service
-
+# Western Governor University's Parcel Service 
 
 ---
-## Required Task Documentation
+# README
+### Task 2 : Implementation Phase of the WGUPS Routing Program  
+>_Christopher D Powell
+> >~Commonly referred to by code-name designation: ***Fernancelot***
 
-[ Task 2 : Implementation Phase of the WGUPS Routing Program ]
-
-Christopher D Powell ( ~Commonly referred to by code-name designation: _Fernancelot_ )
-Student ID 001307071  
+>Student ID 001307071  
 WGU Email: cpow181@wgu.edu
-  ( Completed in the Year of 2025, in the month of 1, upon the 15th day )
-C950 Data Structures and Algorithms II - Task 2  
+
+>Completed in the Year of 2025, in the month of 1, upon the 15th day
+
+>C950 Data Structures and Algorithms II - Task 2  
 Course Version NHP3  
-Python Version: 3.13.1  
+Python Version: 3.13.1
 IDE: PyCharm 2024.1.4 (Professional Edition)  
 Build #PY-241.18034.82
 
@@ -39,7 +40,7 @@ The Western Governors University Parcel Service (WGUPS) Routing System is a Pyth
 ## Project Structure
 
 ```
-Fernancelots WGUPS - Routing Service/
+fernancelots-wgups-delivery-routing-service/
 ├── data/
 │   ├── distances.csv     # Location distances
 │   └── parcels.csv      # Package information
@@ -72,8 +73,8 @@ Fernancelots WGUPS - Routing Service/
 
 ## Running the Application
 
-1. Ensure Python 3.12+ is installed
-2. Verify CSV files are in data/ directory
+1. Ensure Python 3.13.1+ is installed
+2. From the root directory: `/fernancelots-wgups-delivery-routing-service/`
 3. Run: `python main.py`
 4. Follow interface prompts for:
    - Time selection (current/custom)

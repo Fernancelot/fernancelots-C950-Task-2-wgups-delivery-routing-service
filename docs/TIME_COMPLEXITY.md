@@ -1,16 +1,19 @@
-# Western Governor University's Parcel Service
+# Western Governor University's Parcel Service 
+
 ---
-## WGUPS Time Complexity Analysis
+## Time Complexity Analysis
+### Task 2 : Implementation Phase of the WGUPS Routing Program  
+>_Christopher D Powell
+> >~Commonly referred to by code-name designation: ***Fernancelot***
 
-[ Task 2 : Implementation Phase of the WGUPS Routing Program ]
-
-Christopher D Powell ( ~Commonly referred to by code-name designation: _Fernancelot_ )
-Student ID 001307071  
+>Student ID 001307071  
 WGU Email: cpow181@wgu.edu
-  ( Completed in the Year of 2025, in the month of 1, upon the 15th day )
-C950 Data Structures and Algorithms II - Task 2  
+
+>Completed in the Year of 2025, in the month of 1, upon the 15th day
+
+>C950 Data Structures and Algorithms II - Task 2  
 Course Version NHP3  
-Python Version: 3.13.1  
+Python Version: 3.13.1
 IDE: PyCharm 2024.1.4 (Professional Edition)  
 Build #PY-241.18034.82
 

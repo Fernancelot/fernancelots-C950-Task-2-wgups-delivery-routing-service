@@ -1,16 +1,19 @@
-# Western Governor University's Parcel Service
+# Western Governor University's Parcel Service 
+
 ---
 ## Required Task Documentation
+### Task 2 : Implementation Phase of the WGUPS Routing Program  
+>_Christopher D Powell
+> >~Commonly referred to by code-name designation: ***Fernancelot***
 
-[ Task 2 : Implementation Phase of the WGUPS Routing Program ]
-
-Christopher D Powell ( ~Commonly referred to by code-name designation: _Fernancelot_ )
-Student ID 001307071  
+>Student ID 001307071  
 WGU Email: cpow181@wgu.edu
-  ( Completed in the Year of 2025, in the month of 1, upon the 15th day )
-C950 Data Structures and Algorithms II - Task 2  
+
+>Completed in the Year of 2025, in the month of 1, upon the 15th day
+
+>C950 Data Structures and Algorithms II - Task 2  
 Course Version NHP3  
-Python Version: 3.13.1  
+Python Version: 3.13.1
 IDE: PyCharm 2024.1.4 (Professional Edition)  
 Build #PY-241.18034.82
 
@@ -99,13 +102,13 @@ def optimize_route_3opt(truck, distance_matrix, locations_list):
 ## 4. Interface Design
 
 ### 4.1 Current Time Status
-![Current Time Interface](interface_screenshot1.png)
+! [Current Time Interface](interface_screenshot1.png)
 
 ### 4.2 Custom Time Query
-![Custom Time Interface](interface_screenshot2.png)
+! [Custom Time Interface](interface_screenshot2.png)
 
 ### 4.3 Delivery Status
-![Delivery Status](interface_screenshot3.png)
+! [Delivery Status](interface_screenshot3.png)
 
 ## 5. Program Execution
 
