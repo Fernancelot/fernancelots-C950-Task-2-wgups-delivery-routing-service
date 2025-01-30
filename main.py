@@ -1,7 +1,7 @@
 '''
-# main.py
-# created by Christopher Powell
-# Student #001307071
+main.py
+Created by Christopher Powell
+Student #001307071
 '''
 
 import parcels
@@ -10,17 +10,27 @@ from cli_interface import launch_welcome
 
 def main():
     """
-    Entry point for the Delivery Management System.
+    Entry point for the WGUPS Delivery Management System.
     Initializes delivery coordination and launches user interface.
+    Time Complexity: O(n³) where n is number of delivery points
     """
-    # Load package data
-    parcels.import_parcels()
+    try:
+        # Load package data and initialize registry
+        # print("Initializing package data...")
+        parcels.import_parcels()
 
-    # Initialize delivery routes and vehicle assignments
-    total_mileage = routing.coordinate_deliveries()  # Return total mileage but don't print it yet
+        # Coordinate deliveries and optimize routes
+        # print("Optimizing delivery routes...")
+        total_mileage = routing.coordinate_deliveries()
 
-    # Launch the interactive monitoring interface
-    launch_welcome()
+        # Launch interactive interface
+        # print("Starting user interface...")
+        launch_welcome()
+
+    except Exception as e:
+        print(f"\nError initializing delivery system: {str(e)}")
+        print("Please ensure all data files are present in the /data directory and try again.")
+        exit(1)
 
 if __name__ == "__main__":
     main()
