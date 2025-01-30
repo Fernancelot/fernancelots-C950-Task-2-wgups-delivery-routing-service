@@ -35,7 +35,7 @@ class DeliveryVehicle:
         Provides string representation of vehicle status.
         Time Complexity: O(1)
         """
-        return (f"Truck {self.id} | Driver {self.operator} | "
+        return (f"Van {self.id} | Driver {self.operator} | "
                 f"Status: {self.status} | Packages: {len(self.shipments)}/{self.max_cargo} | "
                 f"Distance: {self.distance_traveled:.1f} miles")
 
@@ -56,7 +56,7 @@ class DeliveryVehicle:
 fleet = [
     DeliveryVehicle(1, '08:00:00', 1),  # First truck leaves at 8:00 AM
     DeliveryVehicle(2, '09:05:00', 2),  # Second truck leaves at 9:05 AM
-    DeliveryVehicle(3, '10:20:00', 1)  # Third truck leaves at 10:20 AM (after address correction)
+    DeliveryVehicle(3, '10:26:00', 1)  # Third truck leaves at 10:26 AM (after address correction)
 ]
 
 
@@ -86,6 +86,10 @@ def initialize_fleet(cargo_loads):
                     package.start_time = vehicle.leave_time
                 else:
                     raise LookupError(f"Package {package_id} not found")
+
+            # Ensure van 3 does not leave before 10:26
+            if vehicle.id == 3:
+                vehicle.leave_time = datetime.datetime.strptime('10:26:00', '%H:%M:%S')
 
         return fleet
 
