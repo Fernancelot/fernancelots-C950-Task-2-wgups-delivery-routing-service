@@ -108,17 +108,11 @@ class ParcelRegistry:
 
 
 class Parcel:
-    """
-    Represents an individual delivery parcel with tracking and routing information.
-    """
-
     def __init__(self, tracking_id, destination, city, state, zip_code, deadline,
                  weight, special_instructions, assigned_vehicle=None):
-        """
-        Initializes parcel with delivery requirements and tracking details.
-        Time Complexity: O(1)
-        """
         self.tracking_id = tracking_id
+        self.original_destination = destination
+        self.original_zip = zip_code
         self.destination = destination
         self.dest_city = city
         self.dest_state = state
@@ -157,6 +151,20 @@ class Parcel:
         return (f"Package #{self.tracking_id}: {self.destination}, {self.dest_city}, "
                 f"{self.dest_state} {self.dest_zip} | Weight: {self.weight} | "
                 f"Deadline: {self.deadline.strftime('%I:%M %p')} | Status: {status_str}")
+
+    def update_address(self):
+        if self.tracking_id == 9:
+            if self.status == "at hub":
+                self.destination = self.original_destination
+                self.dest_zip = self.original_zip
+            elif self.status in ["en route", "delivered"]:
+                self.destination = "410 S State St"
+                self.dest_zip = "84111"
+
+    def set_status(self, status):
+        self.status = status
+        self.update_address()
+
 
 
 # Global registry instance
@@ -251,7 +259,7 @@ def _handle_delayed_delivery(parcel, vehicle_loads):
 
 
 def _distribute_remaining_packages(queue, vehicle_loads):
-    """Helper function to distribute remaining packages across trucks"""
+    """Helper function to distribute remaining packages across van"""
     for parcel in queue[:]:
         # Find truck with lowest current load
         truck_loads = [(i, len(packages)) for i, packages in vehicle_loads.items()]
@@ -263,7 +271,7 @@ def _distribute_remaining_packages(queue, vehicle_loads):
                 queue.remove(parcel)
                 break
         else:
-            raise Exception("No available capacity on any truck")
+            raise Exception("No available capacity on any van")
 
 
 def update_status(query_time):
@@ -279,45 +287,46 @@ def update_status(query_time):
             parcel = delivery_registry.locate_parcel(i)
             if parcel:
                 if not parcel.start_time or query_time < parcel.start_time.time():
-                    parcel.status = "at hub"
+                    parcel.set_status = "at hub"
                 elif not parcel.delivery_time or query_time < parcel.delivery_time.time():
-                    parcel.status = f"en route on truck {parcel.assigned_vehicle}"
+                    parcel.set_status("en route")
                 else:
-                    parcel.status = "delivered"
+                    parcel.set_status("delivered")
         except LookupError:
             continue  # Skip if package not foundimport datetime
+"""
 import csv
 
 class ParcelRegistry:
-    """
+    '''
     Implements an efficient registry for parcel tracking and management using a hash table structure.
     Provides O(1) average case lookup and insertion operations.
-    """
+    '''
 
     LOAD_THRESHOLD = 1.5  # Maximum load factor before resizing
     entry_count = 0
 
     def __init__(self):
-        """
+        '''
         Initializes registry with pre-allocated buckets for expected parcel volume.
         Time Complexity: O(1)
-        """
+        '''
         self.capacity = 40  # Initial size based on expected parcel count
         self.storage = [[] for _ in range(self.capacity)]
 
     def compute_index(self, tracking_id):
-        """
+        '''
         Maps tracking ID to storage bucket using hash function.
         Time Complexity: O(1)
-        """
+        '''
         return hash(tracking_id) % self.capacity
 
     def register_parcel(self, tracking_id, parcel_data):
-        """
+        '''
         Adds or updates parcel record in the registry.
         Handles collisions using chaining.
         Time Complexity: O(n) worst case for collision chains
-        """
+        '''
         index = self.compute_index(tracking_id)
         target_bucket = self.storage[index]
         entry = [tracking_id, parcel_data]
@@ -339,10 +348,10 @@ class ParcelRegistry:
         return True
 
     def locate_parcel(self, tracking_id):
-        """
+        '''
         Retrieves parcel information by tracking ID.
         Time Complexity: O(n) worst case for collision chains
-        """
+        '''
         index = self.compute_index(tracking_id)
         target_bucket = self.storage[index]
 
@@ -355,11 +364,11 @@ class ParcelRegistry:
         raise LookupError("Registry lookup operation failed")
 
     def expand_capacity(self):
-        """
+        '''
         Doubles registry capacity and redistributes entries.
         Maintains load factor below threshold.
         Time Complexity: O(n²) for redistribution
-        """
+        '''
         # Preserve existing entries
         temp_storage = []
         for bucket in self.storage:
@@ -377,16 +386,16 @@ class ParcelRegistry:
 
 
 class Parcel:
-    """
+    '''
     Represents an individual delivery parcel with tracking and routing information.
-    """
+    '''
 
     def __init__(self, tracking_id, destination, city, state, zip_code, deadline,
                  weight, special_instructions, assigned_vehicle):
-        """
+        '''
         Initializes parcel with delivery requirements and tracking details.
         Time Complexity: O(1)
-        """
+        '''
         self.tracking_id = tracking_id
         self.destination = destination
         self.dest_city = city
@@ -401,10 +410,10 @@ class Parcel:
         self.assigned_vehicle = assigned_vehicle
 
     def __str__(self):
-        """
+        '''
         Provides formatted string representation of parcel details.
         Time Complexity: O(1)
-        """
+        '''
         return (f"{self.tracking_id}, {self.destination}, {self.dest_city}, "
                 f"{self.dest_state}, {self.dest_zip}, {self.weight}, "
                 f"{self.deadline}, {self.special_instructions}, {self.status}, "
@@ -414,10 +423,10 @@ class Parcel:
 delivery_registry = ParcelRegistry()
 
 def import_parcels():
-    """
+    '''
     Processes parcel data from CSV and organizes into vehicle loads.
     Time Complexity: O(n)
-    """
+    '''
     grouped_parcels = set()
     vehicle_loads = {1: [], 2: [], 3: []}
     processing_queue = []
@@ -602,13 +611,13 @@ def import_parcels():
         raise
 
 def update_status(query_time):
-    """
+    '''
     Updates delivery status of all parcels based on current time.
     Time Complexity: O(n)
 
     Args:
         query_time: Current time or user-specified query time
-    """
+    '''
     for i in range(1, 41):
         try:
             parcel = delivery_registry.locate_parcel(i)
@@ -625,3 +634,4 @@ def update_status(query_time):
             print(f"Parcel with ID {i} not found: {str(e)}")
         except Exception as e:
             print(f"Error processing parcel {i}: {str(e)}")
+"""
