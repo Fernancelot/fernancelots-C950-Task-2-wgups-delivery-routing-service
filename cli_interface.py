@@ -3,7 +3,37 @@ import sys
 import locations
 import parcels
 import van
+import shutil
 
+# get the terminal size
+terminal_width = shutil.get_terminal_size().columns
+
+def handle_special_case_for_parcel_9(query_time=None):
+    """
+    Handles special status update for parcel 9 based on current or queried time.
+    Time Complexity: O(1)
+    """
+    try:
+        package_9 = parcels.delivery_registry.locate_parcel(9)
+        if package_9:
+            # Define time constraints
+            time_0800 = datetime.datetime.strptime("08:20", "%H:%M").time()
+            time_1020 = datetime.datetime.strptime("10:20", "%H:%M").time()
+            time_1700 = datetime.datetime.strptime("17:00", "%H:%M").time()
+
+            # Use current time if query_time is not provided
+            current_time = query_time if query_time else datetime.datetime.now().time()
+
+            # Update address based on time constraints
+            if time_0800 <= current_time < time_1020:
+                package_9.destination = "300 State St"
+                package_9.dest_zip = "84103"
+            elif time_1020 <= current_time:
+                package_9.destination = "410 S State St"
+                package_9.dest_zip = "84111"
+
+    except LookupError:
+        pass  # Package 9 not found
 
 def format_package_info(package, query_time=None):
     """
@@ -11,17 +41,17 @@ def format_package_info(package, query_time=None):
     Time Complexity: O(1)
     """
     # Initialize delivery prediction time based on van assignment
-    predicted_time = "~"
+    predicted_time = "🦉"
     if hasattr(package, 'delivery_time'):
         predicted_time += f" {package.delivery_time.strftime('%I:%M %p')}"
 
     # Determine status
-    status = "at the hub"
+    status = "at hub"
     van = f"VAN: {str(package.assigned_vehicle)}" if package.assigned_vehicle else ""
 
     if query_time:
         if package.start_time and query_time < package.start_time.time():
-            status = "at the hub"
+            status = "at hub"
         elif package.delivery_time and query_time >= package.delivery_time.time():
             status = "delivered"
             predicted_time = f"{package.delivery_time.strftime('%I:%M %p')}"
@@ -46,18 +76,7 @@ def launch_welcome():
     Displays the ASCII welcome screen and transitions to the main menu.
      Time Complexity: O(1)
     """
-    print("\033[1;34m" + """
-
-   █████████   ▐████   ▓███████[  ╓▄███████████C █████████   ███████▌
-   ▀▀█████▀▀   █████▌  ╙▀█████▀`▄██████▀▀▀▀████U ▀▀█████▀▀   ▀▀████▀"
-     ▓████▌   ▐██████    ████  ▓█████"     ▐███U  ]█████       ████
-     └█████   ███████▌  ▐███▌ ]█████C             ]█████       ████
-      ▓████▌ ▐███▐████  ████  ▐█████     ╖╖╖╖╖╖╖╖ ]█████       ████
-       █████µ███⌐ ████▌▐███▌  ▐█████U   ]████████ ]█████       ████
-       ▐███████▌  ▐████████    ██████     ╟████▌   █████⌐      ████
-        ███████    ███████Ü     ██████▄▄▄▄▓████▌   ▀█████▄▄▄▄▄████"
-        ▐█████▌    ▐█████▌       '▀████████████▌     ▀██████████▀
-
+    print("\033[34;94m" + """
              ,╓▄▄▄▄▄▄▄╖,       ,,,╓╓╖╓,,,       ,,▄▄▄▄▄▄▄▄,
               ╙▀███████████▄████████████████▄████████████▀
                  ▀████████████████████████████████████▀
@@ -72,14 +91,13 @@ def launch_welcome():
                     ╙▀████████████╖ ███████████████▀`
                         "╙▀▀▀▀▀██████████▀`╙▀▀▀"`
                                 `▀█████▀
-                                   ▀▀"
- \033[0m""")
-    print("\n" + "\033[1;34m" + "=" * 75 + "\033[0m")
-    print("\033[37m{:^70}\033[0m".format("WGUPS Delivery Management System"))
-    print("\033[37m{:^70}\033[0m".format("Parcel Tracking & Reporting"))
-    print("\033[1;34m" + "=" * 75 + "\033[0m\n")
+                                   ▀▀"\033[0m""")
+    print("\033[34;94m" + "=" * 70 + "\033[0m")
+    print("\033[33;93m{:^70}\033[0m".format("WGUPS Delivery Management System", terminal_width))
+    print("\033[37;97m{:^70}\033[0m".format("Parcel Tracking & Reporting", terminal_width))
+    print("\033[34;94m" + "=" * 70 + "\033[0m\n")
 
-    input("\033[0;37;40mPress Enter to continue...\033[0m")
+    input("\033[29;97;40m   Press Enter to continue...   " + "\033[0m")
     launch_interface()
 
 
@@ -89,63 +107,84 @@ def launch_interface():
     Time Complexity: O(1)
     """
     while True:
-        print("\n" + "\033[1;36;40m" + "=" * 75)
-        print("{:^70}".format("Real-Time Tracking & Reporting"))
-        print("{:^70}".format(">>> Displaying main menu... <<<"))
-        print("=" * 75 + "\033[0m\n")
+        print("\033[34;94m" + """
 
-        print("\033[0;36;40mPlease choose an option to get started\033[0;37;40m\n")
-        print("1. View current package status and van mileage")
-        print("2. Check package status at specific time")
-        print("3. View all package status at specific time")
-        print("4. Exit\n\033[0m")
 
-        selection = input("\033[0;36;40mEnter your selection (1-4): \033[0m")
+
+
+
+
+█████████   ▐████   ▓███████[  ╓▄███████████C █████████   ███████▌
+▀▀█████▀▀   █████▌  ╙▀█████▀`▄██████▀▀▀▀████U ▀▀█████▀▀   ▀▀████▀"
+  ▓████▌   ▐██████    ████  ▓█████"     ▐███U  ]█████       ████
+  └█████   ███████▌  ▐███▌ ]█████C             ]█████       ████
+   ▓████▌ ▐███▐████  ████  ▐█████     ╖╖╖╖╖╖╖╖ ]█████       ████
+    █████µ███⌐ ████▌▐███▌  ▐█████U   ]████████ ]█████       ████
+    ▐███████▌  ▐████████    ██████     ╟████▌   █████⌐      ████
+     ███████    ███████Ü     ██████▄▄▄▄▓████▌   ▀█████▄▄▄▄▄████"
+     ▐█████▌    ▐█████▌       '▀████████████▌     ▀██████████▀
+     """ "\033[0m")
+        print("\n\n\n\033[34;94m" + "=" * 70 + "\033[0m")
+        print("\033[33;93m" + "{:^70}".format(" Real-Time Tracking & Reporting ") + "\033[0m")
+        print("\033[37;97m" + "{:^70}".format(" Displaying main menu") + "\033[0m")
+        print("\033[34;94m" + "=" * 70 + "\n\033[0m")
+
+        print("\n\033[37;97;40m" + "{:^66}".format("🦉 Please choose an option to get started 🦉") + "\033[0m" + "\n")
+        print("\n\033[33;93;40m" + " 1. View current package status and van mileage " + "\033[0m")
+        print("\n\033[33;93;40m" + " 2. Check package status at specific time " + "\033[0m")
+        print("\n\033[33;93;40m" + " 3. View all package status at specific time " + "\033[0m")
+        print("\n\033[0;47;40m" + " 4. EXIT PROGRAM " + "\033[0m")
+
+        selection = input("\n\033[34;94;40m 🦉  Enter your selection (1-4): 🦉 \033[0m")
 
         if selection == '1':
             show_current_status()
+            # After executing the user choice, prompt them to either return to the main menu or exit
+            user_next_step = input(
+                "\n\033[37;97m   Type 0 to return to the main menu or press any other key to exit the program: \033[0m")
+            # If user_next_step is not '0', exit the program
+            if user_next_step != '0':
+                break
         elif selection == '2':
             check_specific_package()
+            # After executing the user choice, prompt them to either return to the main menu or exit
+            user_next_step = input(
+                "\n\033[37;97m   Type 0 to return to the main menu or press any other key to exit the program: \033[0m")
+            # If user_next_step is not '0', exit the program
+            if user_next_step != '0':
+                break
         elif selection == '3':
             check_all_packages_at_time()
+            # After executing the user choice, prompt them to either return to the main menu or exit
+            user_next_step = input(
+                "\n\033[37;97m   Type 0 to return to the main menu or press any other key to exit the program: \033[0m")
+            # If user_next_step is not '0', exit the program
+            if user_next_step != '0':
+                break
         elif selection == '4':
-            print("\033[1;34m" + """
-            
-            
-   █████████   ▐████   ▓███████[  ╓▄███████████C █████████   ███████▌
-   ▀▀█████▀▀   █████▌  ╙▀█████▀`▄██████▀▀▀▀████U ▀▀█████▀▀   ▀▀████▀"
-     ▓████▌   ▐██████    ████  ▓█████"     ▐███U  ]█████       ████
-     └█████   ███████▌  ▐███▌ ]█████C             ]█████       ████
-      ▓████▌ ▐███▐████  ████  ▐█████     ╖╖╖╖╖╖╖╖ ]█████       ████
-       █████µ███⌐ ████▌▐███▌  ▐█████U   ]████████ ]█████       ████
-       ▐███████▌  ▐████████    ██████     ╟████▌   █████⌐      ████
-        ███████    ███████Ü     ██████▄▄▄▄▓████▌   ▀█████▄▄▄▄▄████"
-        ▐█████▌    ▐█████▌       '▀████████████▌     ▀██████████▀
-        
-⠀⠀⠀⠀⠀⠀⢠⣾⣼⢦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⢸⣿⣿⡌⢢⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣄⡀
-⠀⠀⠀⠀⠀⠀⢸⣿⣾⣷⢀⠱⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡜⣿⣿⣷
-⠀⠀⠀⠀⠀⠀⠘⣿⣿⣜⡟⡇⢳⣀⣀⣀⣀⣀⡀⠀⠀⠀⠀⠀⣰⡟⣺⣿⣿⡟
-⠀⠀⠀⠀⠀⢀⣠⣼⣿⣿⣾⣷⡒⢿⣿⠿⠛⢛⣛⣛⡷⠶⡴⡾⢏⣵⡿⣿⡿⠁
-⠀⠀⠀⢀⣴⣟⣟⡿⣻⢿⣟⣱⡿⠆⣠⣒⡮⠉⡠⢤⣢⣨⡍⠈⢻⣭⣿⠟⠁⠀
-⠀⠀⢠⣿⣽⣿⡟⢀⣼⠛⢭⣻⣾⣦⡀⠁⠊⠑⠙⠒⠲⠜⣽⠒⠉⣿⣿⡄⠀⠀
-⠀⣰⣿⣿⡣⡋⢠⡿⠴⠞⣩⡞⢁⣤⣍⠳⣤⣴⡄⠀⠀⠁⢁⣗⠳⡿⢥⡇⠀⠀
-⢀⣿⡟⣼⡗⠀⣿⣅⠀⢘⣛⣇⠈⠻⠟⢀⣿⡇⠈⠒⠈⠁⢾⡿⠀⣿⡍⠃⠀⠀
-⢸⡟⣷⠛⠀⠀⠻⣦⢿⣭⣟⣯⡕⣒⣾⠽⠋⠁⠐⣾⡄⠀⠘⢤⡞⡳⠵⡇⠀⠀
-⢸⣿⡉⠀⠀⠈⣿⣿⣶⣬⣭⣎⠉⠁⠀⠀⠀⢀⣠⣿⣿⠀⠀⠀⣙⢟⢭⡇⠀⠀
-⡄⠋⠀⠀⠀⠀⠘⠁⠛⠻⢰⢤⡍⣁⠀⠸⢴⣿⣿⣿⡎⠆⠀⠦⠙⣹⣾⡀⠀⠀
-⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠬⣫⢷⢄⠉⢛⠿⡟⠀⣀⣀⣼⡃⠈⡇⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⡶⣄⠀⠀⠈⠳⠳⣴⣶⠀⣤⣿⣷⣾⣯⡀⠍⣳⡄⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠇⠀⠀⡑⢦⣄⡀⠈⣻⣶⠝⡭⡀⠈⣨⣩⠪⢃⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠲⢾⣿⡟⠁⢐⣷⣿⢅⢪⣎⠛⢻⣿⡤⢼⡀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠐⠆⠉⠂⠀⠉⣛⡗⠋⠈⠱⠖⠊⡾⠶⠯⡇
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠒⠀⠓⠀⠀⠀⠤⡭⢋⣺⡇
-
-""" + "\033[0m")
-            print("\033[1;36;40mThank you for using the WGUPS Delivery Management System. Goodbye!\033[0m")
+            print("\033[34;94m" + """
+        ⠀⠀⠀⠀⠀⠀⢠⣾⣼⢦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+        ⠀⠀⠀⠀⠀⠀⢸⣿⣿⡌⢢⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣄⡀
+        ⠀⠀⠀⠀⠀⠀⢸⣿⣾⣷⢀⠱⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡜⣿⣿⣷
+        ⠀⠀⠀⠀⠀⠀⠘⣿⣿⣜⡟⡇⢳⣀⣀⣀⣀⣀⡀⠀⠀⠀⠀⠀⣰⡟⣺⣿⣿⡟
+        ⠀⠀⠀⠀⠀⢀⣠⣼⣿⣿⣾⣷⡒⢿⣿⠿⠛⢛⣛⣛⡷⠶⡴⡾⢏⣵⡿⣿⡿⠁
+        ⠀⠀⠀⢀⣴⣟⣟⡿⣻⢿⣟⣱⡿⠆⣠⣒⡮⠉⡠⢤⣢⣨⡍⠈⢻⣭⣿⠟⠁⠀
+        ⠀⠀⢠⣿⣽⣿⡟⢀⣼⠛⢭⣻⣾⣦⡀⠁⠊⠑⠙⠒⠲⠜⣽⠒⠉⣿⣿⡄⠀⠀
+        ⠀⣰⣿⣿⡣⡋⢠⡿⠴⠞⣩⡞⢁⣤⣍⠳⣤⣴⡄⠀⠀⠁⢁⣗⠳⡿⢥⡇⠀⠀
+        ⢀⣿⡟⣼⡗⠀⣿⣅⠀⢘⣛⣇⠈⠻⠟⢀⣿⡇⠈⠒⠈⠁⢾⡿⠀⣿⡍⠃⠀⠀
+        ⢸⡟⣷⠛⠀⠀⠻⣦⢿⣭⣟⣯⡕⣒⣾⠽⠋⠁⠐⣾⡄⠀⠘⢤⡞⡳⠵⡇⠀⠀
+        ⢸⣿⡉⠀⠀⠈⣿⣿⣶⣬⣭⣎⠉⠁⠀⠀⠀⢀⣠⣿⣿⠀⠀⠀⣙⢟⢭⡇⠀⠀
+        ⡄⠋⠀⠀⠀⠀⠘⠁⠛⠻⢰⢤⡍⣁⠀⠸⢴⣿⣿⣿⡎⠆⠀⠦⠙⣹⣾⡀⠀⠀
+        ⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠬⣫⢷⢄⠉⢛⠿⡟⠀⣀⣀⣼⡃⠈⡇⠀⠀
+        ⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⡶⣄⠀⠀⠈⠳⠳⣴⣶⠀⣤⣿⣷⣾⣯⡀⠍⣳⡄⠀
+        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⠿⠇⠀⠀⡑⢦⣄⡀⠈⣻⣶⠝⡭⡀⠈⣨⣩⠪⢃⠀
+        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠲⢾⣿⡟⠁⢐⣷⣿⢅⢪⣎⠛⢻⣿⡤⢼⡀
+        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠐⠆⠉⠂⠀⠉⣛⡗⠋⠈⠱⠖⠊⡾⠶⠯⡇
+        ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠒⠀⠓⠀⠀⠀⠤⡭⢋⣺⡇ """ + "\033[0m")
+            print("\033[32;92;40mThank you for using the WGUPS Delivery Management System. Goodbye! 🦉🦉🦉 \033[0m")
             break
         else:
-            print("\033[0;31;40mInvalid selection. Please choose a valid option (1-4).\033[0m")
+            print("\033[31;91;40mInvalid selection. Please choose a valid option (1-4).\033[0m")
 
 
 def show_current_status():
@@ -155,44 +194,52 @@ def show_current_status():
     """
     current_time = datetime.datetime.now().time()
 
+    # Handle special case for parcel 9
+    handle_special_case_for_parcel_9(current_time)
+
     # Print header
-    print("\n" + "\033[1;36;40m" + "-" * 150)
-    print("{:^150}".format("SUMMARY OF TODAY\'S PACKAGES"))
-    print("{:^150}".format(f"Time Queried: {current_time.strftime('%I:%M %p')}"))
-    print("-" * 150 + "\033[0m\n")
+    print("\n" + "\033[34;94m" + "*" * 142 + "\033[0m")
+    print("\033[33;93m" + "{:^142}".format("SUMMARY OF TODAY\'S DELIVERIES") + "\033[0m")
+    print("\033[37;97m" + "{:^146}".format(f"Time Queried:  {current_time.strftime('%I:%M %p')}" + "  🦉" + "\033[0m"))
+    print("\033[34;94m" + "*" * 142 + "\033[0m\n")
 
     # Print note about delivery times
-    print("\033[0;37;40mNOTE: Expected delivery times are indicated with ~ for packages not yet delivered.\n\033[0m")
+    print("\033[37;97mNOTE: Expected delivery times are indicated with 🦉 for packages not yet delivered.\n\033[0m")
 
     # Print table headers
-    headers = ["ID", "DELIVERY ADDRESS", "DELIVERY DEADLINE", "SPECIAL NOTES", "CURRENT STATUS", "VAN",
+    headers = ["ID", "DELIVERY ADDRESS", "DEADLINE", "SPECIAL NOTES", "STATUS", "VAN",
                "TIME OF DELIVERY"]
 
-    print("\033[1;36;40m" +
-          f"{headers[0]:<5} {headers[1]:<30} {headers[2]:<20} {headers[3]:<35} {headers[4]:<15} {headers[5]:<10} {headers[6]:<20}" +
-          "\033[0m")
+    print("\033[33;93;40m" +
+          f"{headers[0]:<5} {headers[1]:<30} {headers[2]:<20} {headers[3]:<35} {headers[4]:<15} {headers[5]:<10} {headers[6]:<21}"
+          + "\033[0m")
+    print("")
 
     # Show package statuses
     for i in range(1, 41):
         try:
             package = parcels.delivery_registry.locate_parcel(i)
             if package:
-                print("\033[0;36;40m" + format_package_info(package, current_time) + "\033[0m")
+                print("\033[34;94m" + format_package_info(package, current_time) + "\033[0m")
         except Exception as e:
             print(f"\033[0;31;40mError retrieving package {i}: {str(e)}\033[0m")
 
     # Calculate and display total mileage
     distances = locations.import_distances()
     total_mileage = 0
+    # Strings for comparison
+    time_format = "%H:%M"
+    after_hours = datetime.datetime.strptime("17:00", time_format).time()
+    before_hours = datetime.datetime.strptime("08:00", time_format).time()
+
     for vehicle in van.fleet:
         loc, miles = van.calculate_progress(current_time, vehicle, distances)
         total_mileage += miles
-
-    print("\n\033[1;34;40mTotal fleet mileage: {:.1f} miles\033[0m".format(total_mileage))
-
-    # Menu options
-    print("\n\033[0;37;40mEnter 0 to return to the main menu.")
-    print("Enter any other key to exit.\033[0m")
+    if current_time > after_hours or current_time < before_hours:
+        print("\n\033[31;91;40m   NO MILEAGE TO REPORT | TIME OF QUERY IS OUTSIDE OF NORMAL BUSINESS HOURS   \033[0m")
+    else:
+        print("\n\033[1;34;40mTotal fleet mileage: {:.1f} miles\033[0m".format(total_mileage))
+    
 
 def check_specific_package():
     """
@@ -213,6 +260,9 @@ def check_specific_package():
         query_time = parse_time_input(time_str)
         if not query_time:
             return
+
+        # Handle special case for parcel 9
+        handle_special_case_for_parcel_9(query_time)
 
         package = parcels.delivery_registry.locate_parcel(pkg_id)
         if package:
@@ -240,13 +290,16 @@ def check_all_packages_at_time():
     if not query_time:
         return
 
+    # Handle special case for parcel 9
+    handle_special_case_for_parcel_9(query_time)
+
     print("\n" + "\033[1;36;40m" + "-" * 105)
     print("{:^105}".format("PACKAGE STATUS SUMMARY"))
     print("{:^105}".format(f"query time: {query_time.strftime('%I:%M %p')}"))
     print("-" * 105 + "\033[0m\n")
 
     # Print note about delivery times
-    print("\033[0;37;40mNOTE: Projected future delivery times are indicated with ~ for undelivered packages.\n\033[0m")
+    print("\033[0;37;40mNOTE: Expected TOD (Time of Delivery) indicated by 🦉 for undelivered packages.\n\033[0m")
 
     # Print table headers
     headers = ["ID", "DELIVERY ADDRESS", "DEADLINE", "NOTES", "STATUS", "VAN", "DELIVERY DETAILS"]
