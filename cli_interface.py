@@ -19,7 +19,7 @@ def handle_special_case_for_parcel_9(query_time=None):
             # Define time constraints
             time_0800 = datetime.datetime.strptime("08:20", "%H:%M").time()
             time_1020 = datetime.datetime.strptime("10:20", "%H:%M").time()
-            time_1700 = datetime.datetime.strptime("17:00", "%H:%M").time()
+           # time_1700 = datetime.datetime.strptime("17:00", "%H:%M").time()
 
             # Use current time if query_time is not provided
             current_time = query_time if query_time else datetime.datetime.now().time()
@@ -201,10 +201,10 @@ def show_current_status():
     print("\n" + "\033[34;94m" + "*" * 142 + "\033[0m")
     print("\033[33;93m" + "{:^142}".format("SUMMARY OF TODAY\'S DELIVERIES") + "\033[0m")
     print("\033[37;97m" + "{:^146}".format(f"Time Queried:  {current_time.strftime('%I:%M %p')}" + "  🦉" + "\033[0m"))
-    print("\033[34;94m" + "*" * 142 + "\033[0m\n")
+    print("\033[34;94m" + "*" * 142 + "\033[0m")
 
     # Print note about delivery times
-    print("\033[37;97mNOTE: Expected delivery times are indicated with 🦉 for packages not yet delivered.\n\033[0m")
+    print("\033[1;31mNOTE: Expected delivery times are indicated with 🦉 for packages not yet delivered.\n\033[0m")
 
     # Print table headers
     headers = ["ID", "DELIVERY ADDRESS", "DEADLINE", "SPECIAL NOTES", "STATUS", "VAN",
@@ -220,7 +220,7 @@ def show_current_status():
         try:
             package = parcels.delivery_registry.locate_parcel(i)
             if package:
-                print("\033[34;94m" + format_package_info(package, current_time) + "\033[0m")
+                print("\033[0;36m" + format_package_info(package, current_time) + "\033[0m")
         except Exception as e:
             print(f"\033[0;31;40mError retrieving package {i}: {str(e)}\033[0m")
 
@@ -235,10 +235,11 @@ def show_current_status():
     for vehicle in van.fleet:
         loc, miles = van.calculate_progress(current_time, vehicle, distances)
         total_mileage += miles
-    if current_time > after_hours or current_time < before_hours:
+    if current_time < before_hours:
         print("\n\033[31;91;40m   NO MILEAGE TO REPORT | TIME OF QUERY IS OUTSIDE OF NORMAL BUSINESS HOURS   \033[0m")
     else:
-        print("\n\033[1;34;40mTotal fleet mileage: {:.1f} miles\033[0m".format(total_mileage))
+        # Show van mileage
+        print("\n\033[33;93;40m🚚 TOTAL FLEET MILEAGE 🦉: {:.1f} miles\033[0m".format(total_mileage))
     
 
 def check_specific_package():
@@ -247,16 +248,16 @@ def check_specific_package():
     Time Complexity: O(1)
     """
     try:
-        print("\n" + "\033[1;36;40m" + "-" * 90)
-        print("{:^90}".format("PACKAGE LOOKUP"))
-        print("-" * 90 + "\033[0m\n")
+        print("\n" + "\033[34;94m" + "*" * 142 + "\033[0m")
+        print("\033[33;93m" + "{:^142}".format("SINGLE PACKAGE DETAILS") + "\033[0m")
+        print("\033[34;94m" + "*" * 142 + "\033[0m\n")
 
-        pkg_id = int(input("\033[0;36;40mEnter package ID (1-40): \033[0m"))
+        pkg_id = int(input("\033[37;97;40mEnter package ID (1-40): \033[0m"))
         if pkg_id < 1 or pkg_id > 40:
             print("\033[0;31;40mInvalid package ID. Please enter a number between 1 and 40.\033[0m")
             return
 
-        time_str = input("\033[0;36;40mEnter time to check (format: HH:MM am/pm): \033[0m")
+        time_str = input("\033[37;97;40mEnter time to check (format: HH:MM am/pm): \033[0m")
         query_time = parse_time_input(time_str)
         if not query_time:
             return
@@ -264,48 +265,56 @@ def check_specific_package():
         # Handle special case for parcel 9
         handle_special_case_for_parcel_9(query_time)
 
+        # Show package status
         package = parcels.delivery_registry.locate_parcel(pkg_id)
         if package:
-            print("\n\033[1;36;40m=== Package Status ===\033[0m")
-            print("\033[0;36;40m" + format_package_info(package, query_time) + "\033[0m")
-        else:
-            print(f"\033[0;31;40mPackage {pkg_id} not found.\033[0m")
-
+            print("\033[33;93m" + "{:^142}".format("STATUS OVERVIEW") + "\033[0m")
+            print("\033[34;94m" + "*" * 142 + "\033[0m\n")
     except ValueError:
         print("\033[0;31;40mInvalid input. Package ID must be a number.\033[0m")
     except Exception as e:
         print(f"\033[0;31;40mError: {str(e)}\033[0m")
+    else:
+        # Print table headers
+        headers = ["ID", "DELIVERY ADDRESS", "DEADLINE", "SPECIAL NOTES", "STATUS", "VAN",
+               "TIME OF DELIVERY"]
+
+        print("\033[33;93;40m" +
+            f"{headers[0]:<5} {headers[1]:<30} {headers[2]:<20} {headers[3]:<35} {headers[4]:<15} {headers[5]:<10} {headers[6]:<21}"
+            + "\033[0m")
+        print("")
+        print("\033[0;36;40m" + format_package_info(package, query_time) + "\033[0m")
+
 
 def check_all_packages_at_time():
     """
     Shows status of all packages at specified time.
     Time Complexity: O(n) where n is number of packages
     """
-    print("\n" + "\033[1;36;40m" + "-" * 90)
-    print("{:^90}".format("PACKAGE STATUS LOOKUP"))
-    print("-" * 90 + "\033[0m\n")
 
-    time_str = input("\033[0;36;40mEnter time to check (format: HH:MM am/pm): \033[0m")
+    time_str = input("\033\n[34;94;40m🦉  Enter time to check (format: HH:MM am/pm): \033[0m")
     query_time = parse_time_input(time_str)
     if not query_time:
         return
-
+    
     # Handle special case for parcel 9
     handle_special_case_for_parcel_9(query_time)
 
-    print("\n" + "\033[1;36;40m" + "-" * 105)
-    print("{:^105}".format("PACKAGE STATUS SUMMARY"))
-    print("{:^105}".format(f"query time: {query_time.strftime('%I:%M %p')}"))
-    print("-" * 105 + "\033[0m\n")
+    print("\n" + "\033[34;94m" + "*" * 142 + "\033[0m")
+    print("\033[33;93m" + "{:^142}".format("ALL PACKAGE DETAILS — STATUS OVERVIEW") + "\033[0m")
+    print("\033[37;97;40m{:^146}".format(f"TIME QUERIED:  {query_time.strftime('%I:%M %p')}\033[0m"))
+    print("\033[34;94m" + "*" * 142 + "\033[0m")
 
     # Print note about delivery times
-    print("\033[0;37;40mNOTE: Expected TOD (Time of Delivery) indicated by 🦉 for undelivered packages.\n\033[0m")
-
+    print("\033[37;97;40mNOTE: Expected TOD (Time of Delivery) indicated by 🦉 for undelivered packages.\n\033[0m")
+  
     # Print table headers
-    headers = ["ID", "DELIVERY ADDRESS", "DEADLINE", "NOTES", "STATUS", "VAN", "DELIVERY DETAILS"]
-    print("\033[1;36;40m" +
-          f"{headers[0]:<2} {headers[1]:<25} {headers[2]:<10} {headers[3]:<32} {headers[4]:<12} {headers[5]:<8} {headers[6]}" +
-          "\033[0m")
+    headers = ["ID", "DELIVERY ADDRESS", "DEADLINE", "SPECIAL NOTES", "STATUS", "VAN",
+               "TIME OF DELIVERY"]
+    print("\033[33;93;40m" +
+            f"{headers[0]:<5} {headers[1]:<30} {headers[2]:<20} {headers[3]:<35} {headers[4]:<15} {headers[5]:<10} {headers[6]:<21}"
+            + "\033[0m")
+    print("")
 
     # Update package statuses
     parcels.update_status(query_time)
@@ -322,16 +331,13 @@ def check_all_packages_at_time():
     # Show van mileage
     distances = locations.import_distances()
     total_mileage = 0
-    print("\n\033[1;36;40m=== Van Mileage ===\033[0m")
+    print("\n\033[33;93;40m🦉 VAN MILEAGE 🚚 \033[0m")
     for vehicle in van.fleet:
         loc, miles = van.calculate_progress(query_time, vehicle, distances)
         total_mileage += miles
         print(f"\033[0;36;40mVan {vehicle.id}: {miles:.1f} miles\033[0m")
-    print(f"\n\033[1;34;40mTotal fleet mileage: {total_mileage:.1f} miles\033[0m")
+    print(f"\033[33;93;40mTotal fleet mileage: {total_mileage:.1f} miles\033[0m")
 
-    # Menu options
-    print("\n\033[0;37;40mEnter 0 to return to the main menu.")
-    print("Enter any other key to exit.\033[0m")
 
 def parse_time_input(time_str):
     """
@@ -341,5 +347,5 @@ def parse_time_input(time_str):
     try:
         return datetime.datetime.strptime(time_str, "%I:%M %p").time()
     except ValueError:
-        print("\n\033[0;31;40mInvalid time format. Please use 'HH:MM am/pm' (e.g. '09:30 am')\033[0m")
+        print("\n\033[31;91;40mInvalid time format. Please use 'HH:MM am/pm' (e.g. '09:30 am')\033[0m")
         return None

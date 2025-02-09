@@ -1,6 +1,4 @@
 import datetime
-from math import inf
-import random
 import locations as dist
 import parcels
 import van
@@ -24,7 +22,7 @@ def coordinate_deliveries():
         van.initialize_fleet(shipments)
 
         # Handle special cases and constraints
-        _handle_special_cases()
+        # _handle_special_cases()
 
         # Optimize routes
         best_routes = _optimize_all_routes(route_distances, delivery_points)
@@ -37,23 +35,6 @@ def coordinate_deliveries():
 
     except Exception as e:
         raise Exception(f"Error coordinating deliveries: {str(e)}")
-
-
-def _handle_special_cases():
-    """
-    Handles special package requirements like address corrections.
-    Time Complexity: O(n) where n is number of packages
-    """
-    # Handle package #9 address correction
-    try:
-        package_9 = parcels.delivery_registry.locate_parcel(9)
-        if package_9:
-            package_9.destination = "410 S State St"
-            package_9.dest_city = "Salt Lake City"
-            package_9.dest_state = "UT"
-            package_9.dest_zip = "84111"
-    except LookupError:
-        pass  # Package 9 not found
 
 
 def _optimize_all_routes(distances, locations):

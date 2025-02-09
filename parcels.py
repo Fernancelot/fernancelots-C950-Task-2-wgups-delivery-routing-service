@@ -1,6 +1,5 @@
 import datetime
 import csv
-import cli_interface
 
 class ParcelRegistry:
     """
@@ -208,8 +207,9 @@ def import_parcels():
                     _handle_grouped_delivery(parcel, vehicle_loads, grouped_parcels)
                 elif 'Delayed' in parcel.special_instructions:
                     _handle_delayed_delivery(parcel, vehicle_loads)
-#                elif 'Wrong address' in parcel.special_instructions:
-#                    _handle_wrong_address(parcel)
+                elif 'Wrong address' in parcel.special_instructions:
+                    vehicle_loads[3].append(parcel.tracking_id)
+                    processing_queue.remove(parcel)
                 elif 'Can only be on truck' in parcel.special_instructions:
                     truck_num = int(parcel.special_instructions[-1])
                     vehicle_loads[truck_num].append(parcel.tracking_id)
@@ -237,7 +237,10 @@ def _handle_delayed_delivery(parcel, vehicle_loads):
     """Helper function to process delayed delivery requirements"""
     arrival_time = None
     for text in parcel.special_instructions.split():
-        if ':' in text:
+        if 'Wrong' in text:
+            parcel.destination = "410 S State St"
+            parcel.dest_zip = "84111"
+        elif ':' in text:
             arrival_time = datetime.datetime.strptime(text, '%H:%M').time()
             break
 
@@ -248,14 +251,6 @@ def _handle_delayed_delivery(parcel, vehicle_loads):
             vehicle_loads[2].append(parcel.tracking_id)
         else:
             vehicle_loads[3].append(parcel.tracking_id)
-
-"""
-def _handle_wrong_address(parcel):
-#    Helper function to process wrong address correction
-    if parcel.tracking_id == 9:
-        parcel.destination = "300 State St"
-        parcel.dest_zip = "84103"
-"""
 
 
 def _distribute_remaining_packages(queue, vehicle_loads):
@@ -289,7 +284,7 @@ def update_status(query_time):
                 if not parcel.start_time or query_time < parcel.start_time.time():
                     parcel.status = "at hub"
                 elif not parcel.delivery_time or query_time < parcel.delivery_time.time():
-                    parcel.status = f"en route on truck {parcel.assigned_vehicle}"
+                    parcel.status = f"en route {parcel.assigned_vehicle}"
                 else:
                     parcel.status = "delivered"
         except LookupError:
