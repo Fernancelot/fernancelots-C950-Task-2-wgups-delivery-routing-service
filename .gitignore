@@ -1,7 +1,5 @@
 # .gitignore
-.venv/
 *.pyc
-__pycache__/
 *.pyo
 *.log
 *.egg-info/
